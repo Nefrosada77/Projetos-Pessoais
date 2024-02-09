@@ -8,6 +8,7 @@ if (bombas > tamanho) or (bombas < tamanho/4):
     pass
 else:
     continuar = True
+    
 layout = [[sg.Button(button_text=f'{a}{b}',size=(4,2),button_color="LightGrey",disabled_button_color=("DarkGrey","Grey")) for b in range(tamanho)]for a in range(tamanho)]
 for num in range(bombas):
     linha = [f'{l}' for l in range(tamanho)]
@@ -40,11 +41,4 @@ while True:
                 else:
                     pass
         window[f'{event}'].update(text=f'{contador}',disabled=True)
-
-                            
-                
-
-
-
-
 window.close()
