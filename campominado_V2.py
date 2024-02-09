@@ -2,8 +2,8 @@ import PySimpleGUI as sg
 import random
 continuar = False
 while continuar == False:
-tamanho = int(input("Tamanho da Grade"))  
-bombas = int(input("Numero de Bombas"))
+tamanho = int(input("Tamanho da Grade: "))  
+bombas = int(input("Numero de Bombas: "))
 if (bombas > tamanho) or (bombas < tamanho/4):
     pass
 else:
