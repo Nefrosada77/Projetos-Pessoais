@@ -27,8 +27,7 @@ while True:
     if event == '*':
         print("Game Over")
         break
-    else:
-        cavacao = True   
+    else:  
         y = int(event[0])
         x = int(event[1])
         contador = 0
