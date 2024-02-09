@@ -1,7 +1,13 @@
 import PySimpleGUI as sg
 import random
-tamanho = 6  
-bombas = 4
+continuar = False
+while continuar == False:
+tamanho = int(input("Tamanho da Grade"))  
+bombas = int(input("Numero de Bombas"))
+if (bombas > tamanho) or (bombas < tamanho/4):
+    pass
+else:
+    continuar = True
 layout = [[sg.Button(button_text=f'{a}{b}',size=(4,2),button_color="LightGrey",disabled_button_color=("DarkGrey","Grey")) for b in range(tamanho)]for a in range(tamanho)]
 for num in range(bombas):
     linha = [f'{l}' for l in range(tamanho)]
