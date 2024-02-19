@@ -1,8 +1,7 @@
 import PySimpleGUI as sg
 import random
 
-sg.set_options(scaling=2)
-
+sg.set_options(use_ttk_buttons=True)
 class Jogo:
 
     def Menu_inicial(self) -> None:
@@ -25,7 +24,7 @@ class Jogo:
                 if ((self.tamanho > 0 and self.tamanho <= 10) and (self.nbombas > (self.tamanho**2)/5 and self.nbombas <= (self.tamanho**2)/2)):
                     self.Blocos = (self.tamanho**2) - self.nbombas
                     self.layout = [
-                    [sg.Button(button_text=f'{a}{b}',size=(4,2),button_color="Grey on Grey") for b in range(self.tamanho)]for a in range(self.tamanho)
+                    [sg.Button(button_text=f'{a}{b}',button_color="LightGrey on LightGrey",size=(2,1),border_width=(2)) for b in range(self.tamanho)]for a in range(self.tamanho)
                     ]
                     self.Bombas()
                     window.close()
@@ -42,7 +41,7 @@ class Jogo:
             lin = int(random.choice(linha))
             col = int(random.choice(coluna))
             if self.layout[lin][col].get_text() != "*":
-                self.layout[lin][col] = sg.Button(button_text='*',size=(4,2),button_color="Grey on Grey")
+                self.layout[lin][col] = sg.Button(button_text='*',button_color="LightGrey on LightGrey",size=(2,1),border_width=(2))
                 num +=1
             else:
                 pass
@@ -63,7 +62,7 @@ class Jogo:
             match contador:
                 case 0:
                     self.Blocos -= 1
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('LightGrey',None),disabled=True)     
+                    self.window[f'{y}{x}'].update(text='',disabled_button_color=('LightGrey','Grey'),disabled=True)     
                     for l in range(y-1,y+2):
                                 for c in range(x-1,x+2):
                                     if (((l >= self.tamanho) or (l < 0)) or ((c >= self.tamanho) or (c < 0))):
@@ -72,46 +71,48 @@ class Jogo:
                                         self.Cavar(l,c)                    
                 case 1:
                     self.Blocos -= 1
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('LightBlue',None),disabled=True)
+                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('LightBlue','Grey'),disabled=True)
                 case 2:
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('Green',None),disabled=True)
+                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('Green','Grey'),disabled=True)
                     self.Blocos -= 1    
                 case 3:
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('Red',None),disabled=True)
+                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('Red','Grey'),disabled=True)
                     self.Blocos -= 1    
                 case 4:
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('DarkBlue',None),disabled=True)
+                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('DarkBlue','Grey'),disabled=True)
                     self.Blocos -= 1     
                 case 5:
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('DarkRed',None),disabled=True)
+                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('DarkRed','Grey'),disabled=True)
                     self.Blocos -= 1    
                 case 6:
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('Cyan',None),disabled=True)
+                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('Cyan','Grey'),disabled=True)
                     self.Blocos -= 1    
                 case 7:
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('Black',None),disabled=True)
+                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('Black','Grey'),disabled=True)
                     self.Blocos -= 1   
                 case 8:
-                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('White',None),disabled=True)
+                    self.window[f'{y}{x}'].update(text=f'{contador}',disabled_button_color=('White','Grey'),disabled=True)
                     self.Blocos -= 1
+        if self.Blocos == 0:
+            self.window.close()  
+            self.GameWinScreen()
 
-        
     def jogo(self):
-        self.window = sg.Window('Campo Minado',self.layout,resizable=True,element_justification="Center",background_color="LightGrey")
-        while True:  
-            if self.Blocos == 0:
-                self.window.close()  
-                self.GameWinScreen() 
+        self.window = sg.Window('Campo Minado',self.layout,resizable=True,element_justification="Center",background_color="LightGrey",finalize=True)
+        for listabutton in self.layout:
+            for button in listabutton:
+                button.bind("<Button-3>",'Right')
+        while True:   
             event, values = self.window.read()
             if event == sg.WIN_CLOSED:
                 self.window.close()
-            if event[0] == '*': 
+            elif event[0] == '*': 
                 self.window.close()
-                self.GameOverScreen()       
+                self.GameOverScreen()        
             else:
                 y = int(event[0])
                 x = int(event[1]) 
-                self.Cavar(y,x)                    
+                self.Cavar(y,x) 
           
     def GameOverScreen(self):
         layoutGameOver = [[sg.Text("GAME OVER",text_color='Red',justification='Center',font=('Arial',100,'bold'),background_color='Grey')],
