@@ -10,6 +10,7 @@ for a in range(1,10):
 
 #CRIAÇÃO DA GRID
 GRID = [[""for x in range(3)]for y in range(3)]
+GRIDV = [[""for x in range(3)]for y in range(3)]
 
 #IMPLEMENTANDO OS NUMEROS NA GRID
 for y in range(len(GRID)):
@@ -17,8 +18,15 @@ for y in range(len(GRID)):
         NUM_SELECT = random.randrange(len(NUM))
         GRID[y][x] = NUM[NUM_SELECT]
         NUM.pop(NUM_SELECT)
+
+for y in range(3):
+    for x in range(3):
+        GRIDV[y][x] = GRID[((x-2)*(-1))][y]
     
 for linha in GRID:
+    print(linha)
+print()
+for linha in GRIDV:
     print(linha)
 '''-----------------------------------------------------------'''
 #JOGO
@@ -31,11 +39,13 @@ LAYOUTGAME = [[sg.Text('Turno: 1',key='Cont')],
             [sg.Button('CONFIRM',size=(16,2),button_color="DarkRed on Grey")]]
 window = sg.Window('Code Breaker V.1',LAYOUTGAME,element_justification='center',resizable=True,background_color="DarkGrey",scaling=3,text_justification='center')
 turno = 1
+Vitoria = 0
 while True:
     event, values = window.read()
     if event == sg.WIN_CLOSED:
         window.close()
         break
+    
     if event != 'CONFIRM':
                 but = int(window[event].get_text())
                 if but != 9:
@@ -43,7 +53,6 @@ while True:
                 else:
                     window[event].update(1)
     else:
-        Vitoria = 0
         for a in range(0,30,10):
             HitH = 0
             BeH = 0
@@ -62,27 +71,26 @@ while True:
                     HitH += 1
                 else:
                     BeH += 1
-            if HitH == 3:
-                Vitoria += 1
             window[f'H{int(a/10)}'].update(HitH)
             window[f'B{int(a/10)}'].update(BeH)
         for a in range(0,3,1):
             HitV = 0
             BeV = 0
-            if window[a].get_text() == GRID[0][a]:
-                HitV += 1
-            else:
-                BeV += 1
-            if window[a+10].get_text() == GRID[1][a]:
-                HitV += 1
-            else:
-                BeV += 1
-            if window[a+20].get_text() == GRID[2][a]:
-                HitV += 1
-            else:
-                BeV += 1
-            if HitV == 3:
-                Vitoria += 1
+            if window[a].get_text() in GRIDV[a]:
+                if window[a].get_text() == GRID[0][a]:
+                    HitV += 1
+                else:
+                    BeV += 1
+            if window[a+10].get_text() in GRIDV[a]:
+                if window[a+10].get_text() == GRID[1][a]:
+                    HitV += 1
+                else:
+                    BeV += 1
+            if window[a+20].get_text() in GRIDV[a]:
+                if window[a+20].get_text() == GRID[2][a]:
+                    HitV += 1
+                else:
+                    BeV += 1
             window[f'H{a+3}'].update(HitV)
             window[f'B{a+3}'].update(BeV)
         turno += 1
@@ -90,7 +98,3 @@ while True:
         if turno == 8:
             window.close()
             break
-        else:
-            if Vitoria == 3:
-                window.close()
-                break
