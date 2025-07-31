@@ -1,4 +1,4 @@
-package Java;
+package Java.CodeBreaker;
 
 import java.awt.*;
 import javax.swing.*;
@@ -20,6 +20,7 @@ public class CodeBreaker {
         JPanel historyPanel = new JPanel();
         historyPanel.setBackground(Color.LIGHT_GRAY);
         historyPanel.setPreferredSize(new Dimension(500, 0));
+        historyPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 4, Color.gray));
 
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.darkGray);
@@ -28,6 +29,7 @@ public class CodeBreaker {
 
         JPanel gridPanel = new JPanel();
         gridPanel.setBackground(Color.gray);
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         gridPanel.setLayout(new GridLayout(3, 3, 10, 10));
         gridPanel.setPreferredSize(new Dimension(400, 400));
         gridPanel.setAlignmentY(JComponent.CENTER_ALIGNMENT);
