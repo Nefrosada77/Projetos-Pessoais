@@ -21,7 +21,7 @@ public class codeBreakerNoGUI {
                 round = 10;
             } else {
                 round += 1;
-                if (round <= 7) {
+                if (round >= 7) {
                     System.out.println("You Lost");
                 }
             }
