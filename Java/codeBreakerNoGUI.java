@@ -39,6 +39,9 @@ public class codeBreakerNoGUI {
                 String input = scanner.nextLine();
                 // CHECAR SE O INPUT FOI UM NÚMERO
                 try {
+                    if (Integer.parseInt(input) == 0 || Integer.parseInt(input) >= 9) {
+                        input = "1";
+                    }
                     gridInput[i][j] = Integer.parseInt(input);
                 } catch (NumberFormatException e) {
                     gridInput[i][j] = 0;
