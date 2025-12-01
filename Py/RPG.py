@@ -26,12 +26,7 @@ class SkillCompedium():
 
     def add(self, newSkill : Skill):
         self.CompleteList.append(newSkill)
-    
-    def find(self, skill_name : str):
-        for skill in self.CompleteList:
-            if skill.skName.find(skill_name):
-                return skill
-        return None
+
 
 skCompedium = SkillCompedium()
 #--------------------------------------------------------------------------------------------------------------------------------------
@@ -88,7 +83,11 @@ class BattleGUI():
                             case 6:
                                 skilloptions.append(f'\x1b[48;5;90m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
                             case 7:
-                                if self.battleRef.currChar.currHP < self.battleRef.currChar.maxHP:
+                                damaged = False
+                                for char in self.battleRef.currTeam:
+                                    if char.currHP < char.maxHP:
+                                        damaged = True
+                                if damaged:
                                     skilloptions.append(f'\x1b[48;5;157m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
                             
                 chosen_idx = cutie.select(skilloptions) - 1
@@ -118,7 +117,7 @@ class BattleGUI():
                         print(f'\x1b[48;5;255m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                     case 6:
                         print(f'\x1b[48;5;90m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
-                    case 6:
+                    case 7: 
                         print(f'\x1b[48;5;157m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                 match self.selectedSk.skTarget:
                     case 0:
@@ -185,7 +184,7 @@ class Character:
     luck : int
 
     #SKILLS
-    skills : list[Skill] = [skCompedium.find("Basic Attack")]
+    skills : list[Skill] = []
     
     def __init__(self,lvl, str, mag, res, agi, luck):
         self.level = lvl
@@ -198,27 +197,13 @@ class Character:
         self.currHP = self.maxHP
         self.maxMP = int(10 + 1 * (self.level * 2 + self.magic *3))
         self.currMP = self.maxMP
+        self.skills = [skCompedium.CompleteList[0]]
 
     def updateHPMP(self):
         self.maxHP = int(10 * (math.sqrt(self.level) + self.resistance//2))
         self.currHP = self.maxHP
         self.maxMP = int(10 + 1 * (self.level * 2 + self.magic *3))
         self.currMP = self.maxMP
-
-    def getStr(self):
-        return self.strength
-
-    def getMag(self):
-        return self.magic
-
-    def getRes(self):
-        return self.resistance
-
-    def getAgil(self):
-        return self.agility
-
-    def getLuck(self):
-        return self.luck 
     
     def resetState(self):
         self.state = 0
@@ -235,6 +220,13 @@ class Character:
         print(f"Agility - {self.agility}")
         print(f"Luck - {self.luck}")
         print("------------------------")    
+    
+    def addSkill(self, skill : Skill):
+        if len(self.skills) < 7:
+            newSkills = self.skills
+            newSkills.append(skill)
+            self.skills = newSkills
+
 
 class playerChar(Character):
     remainPoint : int = 8
@@ -423,9 +415,10 @@ def createEnemy(name : str) -> Character:
                 newEnemy.agility += 1
             case 4:
                 newEnemy.luck += 1
+
     newEnemy.updateHPMP()
-    newEnemy.skills = [skCompedium.find("Basic Attack"), skCompedium.find("Fireball")]
-    newEnemy.xp = random.randrange(int(player.xpToLevel * 0.85), player.xpToLevel) 
+    newEnemy.addSkill(skCompedium.CompleteList[1])
+    newEnemy.xp = random.randrange(int(player.xpToLevel * 0.85), int(player.xpToLevel))         
     return newEnemy
 
 os.system('cls' if os.name == 'nt' else 'clear')
@@ -442,13 +435,14 @@ skCompedium.add(Skill("Healing", 10, 15, 7, "Heasl a low amount of healt for one
 
 player = playerChar(1,1,1,1,1,1)
 player.name = input("Input character name: ")
-player.skills.append(skCompedium.find("Fireball"))
-player.skills.append(skCompedium.find("Water Attack"))
-player.skills.append(skCompedium.find("Static"))
-player.skills.append(skCompedium.find("Windmill"))
-player.skills.append(skCompedium.find("Blinding Lights"))
-player.skills.append(skCompedium.find("Darkness"))
-player.skills.append(skCompedium.find("Healing"))
+player.addSkill(skCompedium.CompleteList[1])
+player.addSkill(skCompedium.CompleteList[2])
+player.addSkill(skCompedium.CompleteList[3])
+player.addSkill(skCompedium.CompleteList[4])
+player.addSkill(skCompedium.CompleteList[5])
+player.addSkill(skCompedium.CompleteList[6])
+player.addSkill(skCompedium.CompleteList[7])
+player.addSkill(skCompedium.CompleteList[8])
 player.printStats()
 player.statUP()
 
