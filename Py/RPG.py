@@ -60,13 +60,11 @@ class BattleGUI():
                         for char in self.battleRef.enemyTeam:
                             char.printStats()
                         input()
-
-
             case 1: #SKILL MENU
                 os.system('cls' if os.name == 'nt' else 'clear')
                 skilloptions = ["Back"]
                 for skill in self.battleRef.currChar.skills:
-                    if self.battleRef.currChar.currMP > skill.skCost:
+                    if self.battleRef.currChar.currMP >= skill.skCost:
                         match skill.skType:
                             case 0:
                                 skilloptions.append(f'\x1b[48;5;58m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
@@ -161,6 +159,42 @@ class BattleGUI():
                     case 5:          
                         targetlist = [self.battleRef.currChar] 
                 self.battleRef.hit(targetlist, self.selectedSk)
+            case 4: #CHANGE SKILLS MENU
+                os.system('cls' if os.name == 'nt' else 'clear')
+                skilloptions = []
+                print("Your Skills: ")
+                for skill in self.battleRef.playerTeam[0].skills:
+                    print(f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}")
+                print("\nSelect a skill to put in your inventory:")
+                for skill in skCompedium.CompleteList:
+                    if skill.skName != "Basic Attack":
+                        skilloptions.append(f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}")   
+                skilloptions.append("Continue")
+                chosen_idx = cutie.select(skilloptions)
+                if chosen_idx == len(skilloptions)-1:
+                    return
+                else:
+                    self.selectedSk = skCompedium.CompleteList[chosen_idx+1]
+                    self.change_state(5)
+            case 5:
+                print()
+                skilloptions = []                     
+                for idx in range(1,9):
+                    try: 
+                        skilloptions.append(self.battleRef.playerTeam[0].skills[idx].skName)
+                    except:
+                        skilloptions.append("Empty")
+                skilloptions.append("Back")
+                chosen_idx = cutie.select(skilloptions)
+                if chosen_idx < 9:
+                    if len(self.battleRef.playerTeam[0].skills) <= 9:
+                        self.battleRef.playerTeam[0].addSkill(self.selectedSk)
+                    else:
+                        self.battleRef.playerTeam[0].skills[chosen_idx+1] = self.selectedSk
+                    self.change_state(4)
+                else:
+                    self.change_state(4)
+
 #--------------------------------------------------------------------------------------------------------------------------------------
 #CHARACTER CLASS
 class Character:
@@ -176,7 +210,7 @@ class Character:
     maxMP : int
     currMP : int
 
-    #STATS - level 100 = 305
+    #STATS | level 100 = 305
     strength : int
     magic : int
     resistance : int
@@ -222,10 +256,11 @@ class Character:
         print("------------------------")    
     
     def addSkill(self, skill : Skill):
-        if len(self.skills) < 7:
-            newSkills = self.skills
-            newSkills.append(skill)
-            self.skills = newSkills
+        if not skill in self.skills:
+            if len(self.skills) < 8:
+                newSkills = self.skills
+                newSkills.append(skill)
+                self.skills = newSkills
 
 
 class playerChar(Character):
@@ -268,6 +303,9 @@ class playerChar(Character):
                     case 4: 
                         self.luck += 1
                 points -= 1
+            os.system('cls' if os.name == 'nt' else 'clear')
+            self.updateHPMP()
+            self.printStats()
             options = ["NO","YES"]
             print("Continue: ")
             choise_idx = cutie.select(options)
@@ -280,8 +318,11 @@ class playerChar(Character):
                     self.agility = prevAgi
                     self.luck = prevLuck
                 case 1:
-                    self.remainPoint = points
+                    self.remainPoint = 0
                     decide = True 
+    
+    def changeSkills(self):
+        newbattle.gui.change_state(4)
 
 #--------------------------------------------------------------------------------------------------------------------------------------
 #BATTLE
@@ -391,16 +432,10 @@ class Battle():
                 print(f"{target.name} Has been slayed!")
         input()
 
-def createEnemy(name : str) -> Character:
-    if player.level < 5:
-        minLvl = 1
-    else:
-        minLvl = player.level - 2
-    maxLvl : int = player.level + 2
-    selectedLvl : int = random.randrange(minLvl,maxLvl)
-    newEnemy = Character(selectedLvl,1,1,1,1,1)
-
-    points : int = ((selectedLvl - 1) * 3) + 8
+def createEnemy(name : str, level: int) -> Character:
+    #TODO CREATE A TABLE WITH DIFERENT PRESETS FOR ENEMIES
+    newEnemy = Character(level,1,1,1,1,1)
+    points : int = ((level - 1) * 3) + 8
     newEnemy.name = name
     for point in range(points):
         stat = random.randrange(0,4)
@@ -417,12 +452,13 @@ def createEnemy(name : str) -> Character:
                 newEnemy.luck += 1
 
     newEnemy.updateHPMP()
-    newEnemy.addSkill(skCompedium.CompleteList[1])
     newEnemy.xp = random.randrange(int(player.xpToLevel * 0.85), int(player.xpToLevel))         
     return newEnemy
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
+
+#TODO IMPORT SKILLS FROM A EXTERNAL TABLE
 skCompedium.add(Skill("Basic Attack", 10, 0, 0, "Deals low physical damage", 0))
 skCompedium.add(Skill("Fireball", 20, 10, 1, "Deals low fire damage", 0))
 skCompedium.add(Skill("Water Attack", 20, 10, 2, "Deals low water damage", 0))
@@ -430,11 +466,12 @@ skCompedium.add(Skill("Static", 20, 10, 3, "Deals low electric damage", 0))
 skCompedium.add(Skill("Windmill", 20, 10, 4, "Deals low wind damage", 0))
 skCompedium.add(Skill("Blinding Lights", 10, 5, 5, "Deals low light damage", 0))
 skCompedium.add(Skill("Darkness", 10, 5, 6, "Deals low dark damage", 0))
-skCompedium.add(Skill("Healing", 10, 15, 7, "Heasl a low amount of healt for one ally", 2))
+skCompedium.add(Skill("Healing", 10, 15, 7, "Heals a low amount of healt for one ally", 2))
 
 
 player = playerChar(1,1,1,1,1,1)
 player.name = input("Input character name: ")
+player.printStats()
 player.addSkill(skCompedium.CompleteList[1])
 player.addSkill(skCompedium.CompleteList[2])
 player.addSkill(skCompedium.CompleteList[3])
@@ -442,14 +479,28 @@ player.addSkill(skCompedium.CompleteList[4])
 player.addSkill(skCompedium.CompleteList[5])
 player.addSkill(skCompedium.CompleteList[6])
 player.addSkill(skCompedium.CompleteList[7])
-player.addSkill(skCompedium.CompleteList[8])
-player.printStats()
 player.statUP()
 
 inf = True
 newbattle = Battle(player)
 while inf:
-    for a in range(random.randrange(1,3)):
-        newbattle.grabEnemy(createEnemy(f"Enemy {a}"))
+    lvlPoints = player.level + 1
+    enemyPoints = 0
+    while enemyPoints != lvlPoints:
+        if player.level < 5:
+            minLvl = 1
+        else:
+            minLvl = player.level - 1
+        maxLvl = lvlPoints - enemyPoints
+        if minLvl != maxLvl:
+            lvlSelect = random.randrange(minLvl,maxLvl)
+        else:
+            lvlSelect = minLvl
+        if enemyPoints+lvlSelect <= lvlPoints:
+            enemyPoints+=lvlSelect
+            newbattle.grabEnemy(createEnemy(f"Enemy {len(newbattle.enemyTeam)}", lvlSelect))
+        
 
     inf = newbattle.battle()
+    if inf:
+        player.changeSkills()
