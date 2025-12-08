@@ -2,6 +2,7 @@ import random
 import math
 import cutie
 import os
+import csv
 
 #--------------------------------------------------------------------------------------------------------------------------------------
 #SKILL CLASS
@@ -12,14 +13,17 @@ class Skill():
     skType : int #0 - PHYS, 1 - FIRE, 2 - WATER, 3 - ELECTRIC, 4 - WIND, 5 - LIGHT, 6 - DARK, 7 - HEAL
     skDesc : str
     skTarget : int #0 - ENEMY | 1 - ALL ENEMIES | 2 - ALLY | 3 - ALL PARTY | 4 - EVERYONE | 5 - SELF
+    skLevel : int
 
-    def __init__(self, name : str, pow : int, cost : int, type : int, desc : str, target : int):
+    def __init__(self, name : str, pow : int, cost : int, type : int, desc : str, target : int, level: int):
         self.skName = name
         self.skPower = pow
         self.skCost = cost
         self.skType = type
         self.skDesc = desc
         self.skTarget = target
+        self.skLevel = level
+
 
 class SkillCompedium():
     CompleteList : list[Skill] = []
@@ -33,7 +37,7 @@ skCompedium = SkillCompedium()
 #BATTLE GUI
 class BattleGUI():
     battleRef : Battle
-    state : int #0 - START, 1- SKILLSLECT, 2- ITEMSELECT, 3- TARGETSELECT
+    state : int #0- START | 1- SKILLSLECT | 2- ITEMSELECT | 3- TARGETSELECT | 4- CHANGE SKILLS | 5- SELECT SKILL TO CHANGE
     selectedSk : Skill
     
 
@@ -67,26 +71,26 @@ class BattleGUI():
                     if self.battleRef.currChar.currMP >= skill.skCost:
                         match skill.skType:
                             case 0:
-                                skilloptions.append(f'\x1b[48;5;58m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
+                                skilloptions.append(f'\x1b[48;5;58m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP " + '\x1b[0m')
                             case 1:
-                                skilloptions.append(f'\x1b[48;5;160m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
+                                skilloptions.append(f'\x1b[48;5;160m' + f'\x1b[38;5;15m'  + f"{skill.skName} - {skill.skCost} MP " + '\x1b[0m')
                             case 2:
-                                skilloptions.append(f'\x1b[48;5;33m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
+                                skilloptions.append(f'\x1b[48;5;33m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP " + '\x1b[0m')
                             case 3:
-                                skilloptions.append(f'\x1b[48;5;226m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
+                                skilloptions.append(f'\x1b[48;5;226m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP " + '\x1b[0m')
                             case 4:
-                                skilloptions.append(f'\x1b[48;5;34m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
+                                skilloptions.append(f'\x1b[48;5;34m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP " + '\x1b[0m')
                             case 5:
-                                skilloptions.append(f'\x1b[48;5;255m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
+                                skilloptions.append(f'\x1b[48;5;255m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP " + '\x1b[0m')
                             case 6:
-                                skilloptions.append(f'\x1b[48;5;90m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
+                                skilloptions.append(f'\x1b[48;5;90m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP " + '\x1b[0m')
                             case 7:
                                 damaged = False
                                 for char in self.battleRef.currTeam:
                                     if char.currHP < char.maxHP:
                                         damaged = True
                                 if damaged:
-                                    skilloptions.append(f'\x1b[48;5;157m' + f"{skill.skName} - {skill.skCost} MP" + '\x1b[0m')
+                                    skilloptions.append(f'\x1b[48;5;157m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP " + '\x1b[0m')
                             
                 chosen_idx = cutie.select(skilloptions) - 1
                 if chosen_idx == -1:
@@ -102,29 +106,29 @@ class BattleGUI():
                 targetoptions = ["Back"]
                 match self.selectedSk.skType:
                     case 0:
-                        print(f'\x1b[48;5;58m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
+                        print(f'\x1b[48;5;58m' + f'\x1b[38;5;15m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                     case 1:
-                        print(f'\x1b[48;5;160m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
+                        print(f'\x1b[48;5;160m' + f'\x1b[38;5;15m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                     case 2:
-                        print(f'\x1b[48;5;33m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
+                        print(f'\x1b[48;5;33m' + f'\x1b[38;5;15m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                     case 3:
-                        print(f'\x1b[48;5;226m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
+                        print(f'\x1b[48;5;226m' + f'\x1b[38;5;0m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                     case 4:
-                        print(f'\x1b[48;5;120m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
+                        print(f'\x1b[48;5;120m' + f'\x1b[38;5;15m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                     case 5:
-                        print(f'\x1b[48;5;255m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
+                        print(f'\x1b[48;5;255m' + f'\x1b[38;5;0m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                     case 6:
-                        print(f'\x1b[48;5;90m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
+                        print(f'\x1b[48;5;90m' + f'\x1b[38;5;15m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                     case 7: 
-                        print(f'\x1b[48;5;157m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
+                        print(f'\x1b[48;5;157m' + f'\x1b[38;5;0m' + f"{self.selectedSk.skDesc}" + '\x1b[0m')
                 match self.selectedSk.skTarget:
                     case 0:
                         for enemy in self.battleRef.enemyTeam:
-                            enemy.printStats()
+                            enemy.printHPMP()
                             targetoptions.append(enemy.name)
                     case 1:
                         for enemy in self.battleRef.enemyTeam:
-                            enemy.printStats()
+                            enemy.printHPMP()
                         targetoptions.append("All Enemies")
                     case 2:
                         for ally in self.battleRef.playerTeam:
@@ -132,43 +136,78 @@ class BattleGUI():
                             targetoptions.append(ally.name)
                     case 3:
                         for enemy in self.battleRef.enemyTeam:
-                            enemy.printStats()
+                            enemy.printHPMP()
                         targetoptions.append("All Party")           
                     case 4:
                         for char in self.battleRef.allchar:
-                            char.printStats()
+                            enemy.printHPMP()
                         targetoptions.append("Everyone")
                     case 5:          
-                        self.battleRef.currChar.printStats()
+                        self.battleRef.currChar.printHPMP()
                         targetoptions.append(self.battleRef.currChar.name)       
                 chosen_idx = cutie.select(targetoptions) -1
                 if chosen_idx == -1:
                     self.selectedSk = None
                     self.change_state(0)
-                match self.selectedSk.skTarget:
-                    case 0:
-                        targetlist = [self.battleRef.enemyTeam[chosen_idx]]
-                    case 1:
-                        targetlist = [self.battleRef.enemyTeam]
-                    case 2:
-                        targetlist = [self.battleRef.playerTeam[chosen_idx]]
-                    case 3:
-                        targetlist = [self.battleRef.playerTeam]         
-                    case 4:
-                        targetlist = [self.battleRef.allchar]
-                    case 5:          
-                        targetlist = [self.battleRef.currChar] 
-                self.battleRef.hit(targetlist, self.selectedSk)
+                else:
+                    match self.selectedSk.skTarget:
+                        case 0:
+                            targetlist = [self.battleRef.enemyTeam[chosen_idx]]
+                        case 1:
+                            targetlist = self.battleRef.enemyTeam
+                        case 2:
+                            targetlist = [self.battleRef.playerTeam[chosen_idx]]
+                        case 3:
+                            targetlist = self.battleRef.playerTeam
+                        case 4:
+                            targetlist = self.battleRef.allchar
+                        case 5:      
+                            targetlist = [self.battleRef.currChar]
+                    self.battleRef.hit(targetlist, self.selectedSk)
             case 4: #CHANGE SKILLS MENU
                 os.system('cls' if os.name == 'nt' else 'clear')
                 skilloptions = []
                 print("Your Skills: ")
                 for skill in self.battleRef.playerTeam[0].skills:
-                    print(f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}")
+                    if skill.skName != "Basic Attack":
+                        match skill.skType:
+                            case 0:
+                                print(f'\x1b[48;5;58m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m')
+                            case 1:
+                                print(f'\x1b[48;5;160m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m')
+                            case 2:
+                                print(f'\x1b[48;5;33m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m')
+                            case 3:
+                                print(f'\x1b[48;5;226m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m')
+                            case 4:
+                                print(f'\x1b[48;5;34m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m')
+                            case 5:
+                                print(f'\x1b[48;5;255m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m')
+                            case 6:
+                                print(f'\x1b[48;5;90m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m')
+                            case 7:
+                                print(f'\x1b[48;5;157m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m')
                 print("\nSelect a skill to put in your inventory:")
                 for skill in skCompedium.CompleteList:
                     if skill.skName != "Basic Attack":
-                        skilloptions.append(f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}")   
+                        if skill.skLevel <= self.battleRef.playerTeam[0].level:
+                            match skill.skType:
+                                case 0:
+                                    skilloptions.append(f'\x1b[48;5;58m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m') 
+                                case 1:
+                                    skilloptions.append(f'\x1b[48;5;160m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m') 
+                                case 2:
+                                    skilloptions.append(f'\x1b[48;5;33m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m') 
+                                case 3:
+                                    skilloptions.append(f'\x1b[48;5;226m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m') 
+                                case 4:
+                                    skilloptions.append(f'\x1b[48;5;34m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m') 
+                                case 5:
+                                    skilloptions.append(f'\x1b[48;5;255m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m') 
+                                case 6:
+                                    skilloptions.append(f'\x1b[48;5;90m' + f'\x1b[38;5;15m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m') 
+                                case 7:
+                                    skilloptions.append(f'\x1b[48;5;157m' + f'\x1b[38;5;0m' + f"{skill.skName} - {skill.skCost} MP | {skill.skDesc}" + '\x1b[0m') 
                 skilloptions.append("Continue")
                 chosen_idx = cutie.select(skilloptions)
                 if chosen_idx == len(skilloptions)-1:
@@ -176,7 +215,7 @@ class BattleGUI():
                 else:
                     self.selectedSk = skCompedium.CompleteList[chosen_idx+1]
                     self.change_state(5)
-            case 5:
+            case 5: #SELECT SLOT TO CHANGE MENU
                 print()
                 skilloptions = []                     
                 for idx in range(1,9):
@@ -187,10 +226,10 @@ class BattleGUI():
                 skilloptions.append("Back")
                 chosen_idx = cutie.select(skilloptions)
                 if chosen_idx < 9:
-                    if len(self.battleRef.playerTeam[0].skills) <= 9:
-                        self.battleRef.playerTeam[0].addSkill(self.selectedSk)
+                    if len(self.battleRef.playerTeam[0].skills) >= 9:
+                        self.battleRef.playerTeam[0].replaceSkill(self.selectedSk, chosen_idx+1)
                     else:
-                        self.battleRef.playerTeam[0].skills[chosen_idx+1] = self.selectedSk
+                        self.battleRef.playerTeam[0].addSkill(self.selectedSk)
                     self.change_state(4)
                 else:
                     self.change_state(4)
@@ -198,8 +237,8 @@ class BattleGUI():
 #--------------------------------------------------------------------------------------------------------------------------------------
 #CHARACTER CLASS
 class Character:
-    name : str
-    level : int
+    name : str = None
+    level : int = 1
     xp: int = 0
 
     state : int = 0 #0 - NONE | 1 - GUARDING
@@ -209,6 +248,13 @@ class Character:
     currHP : int
     maxMP : int
     currMP : int
+
+    #AFFINITIES
+    weakness : list = []
+    resist : list = []
+    block : list = []
+    drain : list = []
+    repel : list = []
 
     #STATS | level 100 = 305
     strength : int
@@ -244,10 +290,10 @@ class Character:
 
     def printStats(self):
         print("------------------------")
-        print(f"{self.name} - Level {self.level}")
+        print(f"{self.name} | Level {self.level}")
+        print("------------------------")        
         print(f"HP - {self.currHP}/{self.maxHP}")
-        print(f"MP - {self.currMP}/{self.maxMP}")
-        print()
+        print(f"MP - {self.currMP}/{self.maxMP}\n")
         print(f"Strength - {self.strength}")
         print(f"Magic - {self.magic}")
         print(f"Resistence - {self.resistance}")
@@ -255,12 +301,25 @@ class Character:
         print(f"Luck - {self.luck}")
         print("------------------------")    
     
+    def printHPMP(self):
+        print("------------------------")
+        print(f"{self.name} | Level {self.level}")
+        print("------------------------")        
+        print(f"HP - {self.currHP}/{self.maxHP}")
+        print(f"MP - {self.currMP}/{self.maxMP}")
+        print("------------------------")   
+    
     def addSkill(self, skill : Skill):
         if not skill in self.skills:
-            if len(self.skills) < 8:
+            if len(self.skills) < 9:
                 newSkills = self.skills
                 newSkills.append(skill)
                 self.skills = newSkills
+
+    def replaceSkill(self, newSkill : Skill, replaceIdx : int):
+        newSkills = self.skills
+        newSkills[replaceIdx] = newSkill
+        self.skills = newSkills
 
 
 class playerChar(Character):
@@ -272,6 +331,10 @@ class playerChar(Character):
         self.level += 1
         self.remainPoint += 3
         self.xpToLevel *= 1.5
+        for skill in skCompedium.CompleteList:
+            if skill.skLevel == self.level:
+                print(f"Unlocked new skill -> {skill.skName}")
+        input()
         self.statUP()
     
     def statUP(self):
@@ -353,22 +416,22 @@ class Battle():
             os.system('cls' if os.name == 'nt' else 'clear')
             for char in self.allchar:
                 char.resetState()
-            if self.currTeam == self.playerTeam:
-                if self.energy <= 0:
+            if self.currTeam == self.playerTeam: 
+                if self.energy <= 0: #PASS TURN TO THE ENEMY TEAM
                     self.currTeam = self.enemyTeam
                     self.currChar = self.enemyTeam[0]
                     self.energy = len(self.currTeam)
-                else:
+                else: #CHANGE PLAYER TEAM TURN
                     if ((self.currTeam.index(self.currChar) + 1) > len(self.currTeam)-1):
                         self.currChar = self.currTeam[0]
                     else:
                         self.currChar = self.currTeam[self.currTeam.index(self.currChar)+1]
             else:
-                if self.energy <= 0:
+                if self.energy <= 0: #PASS TURN TO THE PLAYER TURN
                     self.currTeam = self.playerTeam
                     self.currChar = self.playerTeam[0]
                     self.energy = len(self.currTeam)
-                else:
+                else: #CHANGE ENEMY TEAM TURN
                     if ((self.currTeam.index(self.currChar) + 1) > len(self.currTeam)-1):
                         self.currChar = self.currTeam[0]
                     else:
@@ -391,36 +454,41 @@ class Battle():
                         targetlist = self.allchar
                     case 5:          
                         targetlist = [self.currChar]
-                if self.currChar.currMP < selectSkill.skCost: 
-                    self.hit(targetlist, self.currChar.skills[0])
-                else:
-                    self.hit(targetlist, random.choice(self.currChar.skills))
+                self.hit(targetlist, selectSkill)
         self.currChar = None
         self.currTeam = []
         if len(self.enemyTeam) > 0:
-            print("You Lose")
             return False
         else:
-            print("You Win")
-            if self.playerTeam[0].xp > self.playerTeam[0].xpToLevel:
+            self.playerTeam[0].xp += random.randrange(int(self.playerTeam[0].xpToLevel * 0.85), int(self.playerTeam[0].xpToLevel))
+            while self.playerTeam[0].xp > self.playerTeam[0].xpToLevel:
                 self.playerTeam[0].levelUP()
             return True
 
 
-    def hit(self, targetlist : list, skill : Skill):
+    def hit(self, targetlist : list[Character], skill : Skill):
         self.currChar.currMP -= skill.skCost
+        damage : int = skill.skPower
+        energyUsed : int = 1
         for target in targetlist:
-            if skill.skType == 7:
-                target.currHP += skill.skPower
-                if target.currHP > target.maxHP:
-                    target.currHP = target.maxHP
-            else:
-                if target.state == 1:
-                    target.currHP -= skill.skPower/2
-                    self.energy -= 1
-                else:
-                    target.currHP -= skill.skPower
-                    self.energy -= 1
+            if skill.skType in target.repel:
+                target = self.currChar
+                energyUsed = self.energy
+            if target.state == 1 or skill.skType in target.resist:
+                damage /= 2
+            if skill.skType in target.weakness:
+                damage *= 2
+                energyUsed = 0.5
+            if skill.skType in target.drain or skill.skType == 7:
+                damage *= -1
+                energyUsed = self.energy
+            if skill.skType in target.block:
+                damage = 0
+                energyUsed = 2
+            target.currHP -= damage
+            if target.currHP > target.maxHP:
+                target.currHP = target.maxHP
+            self.energy -= energyUsed
             print(f"{self.currChar.name} used {skill.skName} on {target.name}")
         #print(f"{self.energy}")
         if target.currHP <= 0:
@@ -428,9 +496,9 @@ class Battle():
                 self.playerTeam.remove(target)
             else:
                 self.enemyTeam.remove(target)
-                self.currChar.xp += target.xp
                 print(f"{target.name} Has been slayed!")
         input()
+
 
 def createEnemy(name : str, level: int) -> Character:
     #TODO CREATE A TABLE WITH DIFERENT PRESETS FOR ENEMIES
@@ -450,27 +518,40 @@ def createEnemy(name : str, level: int) -> Character:
                 newEnemy.agility += 1
             case 4:
                 newEnemy.luck += 1
-
-    newEnemy.updateHPMP()
-    newEnemy.xp = random.randrange(int(player.xpToLevel * 0.85), int(player.xpToLevel))         
+    newEnemy.updateHPMP()        
     return newEnemy
 
 os.system('cls' if os.name == 'nt' else 'clear')
+#--------------------------------------------------------------------------------------------------------------------------------------
+#SKILL CREATION
+def createSkill(name : str, pow : int, cost : int, type : int, desc : str, target : int, level: int):
+    skCompedium.add(Skill(name, pow, cost, type, desc, target, level))
 
+compediumFile = "skCompedium.csv"
+fields = []
+rows = []
 
-#TODO IMPORT SKILLS FROM A EXTERNAL TABLE
-skCompedium.add(Skill("Basic Attack", 10, 0, 0, "Deals low physical damage", 0))
-skCompedium.add(Skill("Fireball", 20, 10, 1, "Deals low fire damage", 0))
-skCompedium.add(Skill("Water Attack", 20, 10, 2, "Deals low water damage", 0))
-skCompedium.add(Skill("Static", 20, 10, 3, "Deals low electric damage", 0))
-skCompedium.add(Skill("Windmill", 20, 10, 4, "Deals low wind damage", 0))
-skCompedium.add(Skill("Blinding Lights", 10, 5, 5, "Deals low light damage", 0))
-skCompedium.add(Skill("Darkness", 10, 5, 6, "Deals low dark damage", 0))
-skCompedium.add(Skill("Healing", 10, 15, 7, "Heals a low amount of healt for one ally", 2))
+with open(compediumFile, 'r') as csvfile:
+    csvreader = csv.reader(csvfile)
 
+    fields = next(csvreader)
+    for row in csvreader:
+        rows.append(row)
+    
+for row in rows:
+    createSkill(row[0], int(row[1]), int(row[2]), int(row[3]), row[4], int(row[5]), int(row[6]))
+
+for skill in skCompedium.CompleteList:
+    #print(skill.skName)
+    pass
 
 player = playerChar(1,1,1,1,1,1)
-player.name = input("Input character name: ")
+while player.name == None or (len(player.name) < 3 or len(player.name) > 15):
+    player.name = input("Input character name: ")
+    if len(player.name) < 3:
+        print("Name's too short")
+    if len(player.name) > 15:
+        print("Name's too long")
 player.printStats()
 player.addSkill(skCompedium.CompleteList[1])
 player.addSkill(skCompedium.CompleteList[2])
@@ -484,23 +565,8 @@ player.statUP()
 inf = True
 newbattle = Battle(player)
 while inf:
-    lvlPoints = player.level + 1
-    enemyPoints = 0
-    while enemyPoints != lvlPoints:
-        if player.level < 5:
-            minLvl = 1
-        else:
-            minLvl = player.level - 1
-        maxLvl = lvlPoints - enemyPoints
-        if minLvl != maxLvl:
-            lvlSelect = random.randrange(minLvl,maxLvl)
-        else:
-            lvlSelect = minLvl
-        if enemyPoints+lvlSelect <= lvlPoints:
-            enemyPoints+=lvlSelect
-            newbattle.grabEnemy(createEnemy(f"Enemy {len(newbattle.enemyTeam)}", lvlSelect))
+    newbattle.grabEnemy(createEnemy(f"Enemy {len(newbattle.enemyTeam)}", player.level))
         
-
     inf = newbattle.battle()
     if inf:
         player.changeSkills()
