@@ -1,0 +1,13 @@
+name,power,cost,type,desc,target,level
+Basic Attack,10,0,0,Deals low physical damage to one enemy,0,1
+Agi,20,10,1,Deals low fire damage to one enemy,0,0
+Bufu,20,10,2,Deals low ice damage to one enemy,0,1
+Zio,20,10,3,Deals low electric damage to one enemy,0,1
+Zan,20,10,4,Deals low force damage to one enemy,0,1
+Hama,10,5,5,Deals low light damage to one enemy,0,1
+Mudo,10,5,6,Deals low dark damage to one enemy,0,1
+Dia,10,15,7,Heals a low amount of healt for one ally,2,1
+Maragi,20,20,1,Deals low fire damage to all enemies,1,10
+Mabufu,20,20,2,Deals low ice damage to all enemies,1,10
+Mazio,20,20,3,Deals low electric damage to all enemies,1,10
+Mazan,20,20,4,Deals low force damage to all enemies,1,10
