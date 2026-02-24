@@ -28,7 +28,7 @@ class Panel():
                 self.color) #COLOR
 
 class ListPanel(Panel):
-    items : list
+    remember : bool = False
     selector : int = 0
     textColor : int
     margin : int
@@ -50,6 +50,12 @@ class ListPanel(Panel):
     def draw(self):
         super().draw()
         for i in range(len(self.items)):
+            if i == self.selector:
+                py.circ((self.position.x - self.size.x/2) + self.margin/2 - 3, 
+                        ((self.position.y - (self.size.y/2)) + (self.margin/2) + ((py.FONT_HEIGHT)*i)) + (self.space*i) + 2,
+                        2,
+                        py.COLOR_BLACK) 
+                
             if type(self.items[i]) == str:
                 py.text((self.position.x - (self.size.x/2)) + (self.margin/2) + 2,
                         ((self.position.y - (self.size.y/2)) + (self.margin/2) + ((py.FONT_HEIGHT)*i)) + (self.space*i),
@@ -58,17 +64,12 @@ class ListPanel(Panel):
             else:
                 skillColor = getSkillColor(self.items[i])
                 if skillColor != -1:
-                    if self.items[i].cost > player.currMP: #TODO CHANGE player FOR CURR CHARACTER
+                    if self.items[i].cost > player.currMP:
                         skillColor = py.COLOR_GRAY
                     py.text((self.position.x - (self.size.x/2)) + (self.margin/2) + 2,
                             ((self.position.y - (self.size.y/2)) + (self.margin/2) + ((py.FONT_HEIGHT)*i)) + (self.space*i),
                             f"{self.items[i].name} - {self.items[i].cost}MP",
-                            skillColor)
-            if i == self.selector:
-                py.circ((self.position.x - self.size.x/2) + self.margin/2 - 3, 
-                        ((self.position.y - (self.size.y/2)) + (self.margin/2) + ((py.FONT_HEIGHT)*i)) + (self.space*i) + 2,
-                        2,
-                        py.COLOR_BLACK)  
+                            skillColor,)
                 
     def UP(self):
         if self.selector > 0:
@@ -80,13 +81,14 @@ class ListPanel(Panel):
     
     def SELECT(self) -> int:
         print(self.items[self.selector])
-        if player.currMP >= self.items[self.selector].cost:
-            if self.items[self.selector].name == "Bufu":
-                enemies.addChar(drifter)
-            enemieSelctor.skillSelected = self.items[self.selector]
-            return 1
-        else:
-            return 0
+        if len(enemies.enemies) > 0:
+            if player.currMP >= self.items[self.selector].cost:
+                enemieSelctor.skillSelected = self.items[self.selector]
+                return 1
+        return 0
+    
+    def changeSelector(self):
+        self.selector = 0
 
 class CharPanel(Panel):
     char : CharProfile
@@ -108,11 +110,11 @@ class CharPanel(Panel):
                 py.COLOR_BLACK)
         py.text((self.position.x - (self.size.x/2)) + (self.margin/2),
                 ((self.position.y - (self.size.y/2)) + (self.margin/2) + ((py.FONT_HEIGHT)*1)) + (self.space*1),
-                f"HP : {self.char.currHP}/{self.char.maxHP}",
+                f"HP : {self.char.currHP} / {self.char.maxHP}",
                 py.COLOR_RED)
         py.text((self.position.x - (self.size.x/2)) + (self.margin/2),
                 ((self.position.y - (self.size.y/2)) + (self.margin/2) + ((py.FONT_HEIGHT)*2)) + (self.space*2),
-                f"MP : {self.char.currMP}/{self.char.maxMP}",
+                f"MP : {self.char.currMP} / {self.char.maxMP}",
                 py.COLOR_DARK_BLUE)
 
 
@@ -143,6 +145,7 @@ class EnemiesPanel():
             enemies.draw()
 
 class enemieSelector():
+    remember : bool = True
     selector : int = 0
     skillSelected : sk.Skill
 
@@ -150,13 +153,12 @@ class enemieSelector():
         for i in range(len(enemies.enemies)):
             if i == self.selector:
                 enemies.selectedEnemie = enemies.enemies[self.selector]
-            '''
-            if i == self.selector:
-                py.blt((WIDTH/(len(enemies.enemies)+1))*(i+1)-7,5,
+                offset = py.sin(py.frame_count*20)
+                py.blt((WIDTH/(len(enemies.enemies)+1))*(i+1)-7,7 + offset,
                        0,
                        0,0,
-                       16,16,1,scale=1.5)
-            '''
+                       16,16,0,scale=1.5)
+        
     def LEFT(self):
         if self.selector != 0:
             self.selector -= 1
@@ -167,12 +169,22 @@ class enemieSelector():
     
     def SELECT(self) -> int:
         print(enemies.enemies[self.selector])
+        skillList.changeSelector()
         enemies.enemies[self.selector].currHP -= 50
         if enemies.enemies[self.selector].currHP <= 0:
             enemies.enemies.remove(enemies.enemies[self.selector])
+            self.selector = 0
         enemies.selectedEnemie = None
         player.currMP -= self.skillSelected.cost
-        self.selector = 0
+        if self.remember:
+            if self.selector >= len(enemies.enemies):
+                self.selector = 0
+        else:
+            self.selector = 0
+        return 0
+    
+    def RETURN(self):
+        enemies.selectedEnemie = None
         return 0
 
 class CharProfile():
@@ -208,7 +220,7 @@ def getSkillColor(skill : sk.Skill) -> int:
         case sk.Type.FORCE:
             return py.COLOR_GREEN
         case sk.Type.LIGHT:
-            return py.COLOR_WHITE
+            return py.COLOR_PINK
         case sk.Type.DEATH:
             return py.COLOR_PURPLE
         case sk.Type.RECOVERY:
@@ -216,7 +228,7 @@ def getSkillColor(skill : sk.Skill) -> int:
         case sk.Type.SUPPORT:
             return py.COLOR_NAVY
         case sk.Type.ALMIGHTY:
-            return py.COLOR_PEACH
+            return py.COLOR_BLACK
         
 drifter = CharProfile("Drifter", 170, 12)
 drifter2 = CharProfile("Drifter", 170, 12)
@@ -225,8 +237,12 @@ player = CharProfile("Commando", 110, 12)
 player.addSkill(sk.bufu)
 player.addSkill(sk.agi)
 player.addSkill(sk.zan)
-debugPanel = Panel(WIDTH/2,HEIGHT/2,200,200,py.COLOR_WHITE)
-skillList = ListPanel(py.FONT_WIDTH*(15),204 - py.FONT_HEIGHT*(len(player.skills)-1),py.FONT_WIDTH*(15),player.skills,py.COLOR_WHITE,py.COLOR_BLACK,16,4)
+player.addSkill(sk.zio)
+player.addSkill(sk.hama)
+player.addSkill(sk.mudo)
+player.addSkill(sk.tarukaja)
+player.addSkill(sk.megido)
+skillList = ListPanel(py.FONT_WIDTH*(15),204 - py.FONT_HEIGHT*(len(player.skills)-1),py.FONT_WIDTH*(15),player.skills,7,py.COLOR_BLACK,16,4)
 playerPanel = CharPanel(WIDTH/5*4.35,HEIGHT/7*6,py.FONT_WIDTH*15,py.COLOR_WHITE,player,16,4)
 enemies = EnemiesPanel([drifter,drifter2,drifter3])
 enemieSelctor = enemieSelector()
