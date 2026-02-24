@@ -24,3 +24,4 @@ class Skill():
 attack = Skill("Attack", 0, Type.PHYS)
 bufu = Skill("Bufu", 3, Type.ICE)
 agi = Skill("Agi", 3, Type.FIRE)
+zan = Skill("Zan", 3, Type.FORCE)
